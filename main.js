@@ -1,12 +1,10 @@
 const NodeMediaServer = require('node-media-server');
-const getPort = require('get-port');
-const electron = require('electron');
+const { app, ipcMain, ipcRenderer } = require('electron');
+require('@electron/remote/main').initialize();
 const path = require('path');
 const { menubar: Menubar } = require('menubar');
 
 require('electron-context-menu')();
-
-const { app, BrowserWindow, Tray, Menu, ipcMain } = electron;
 
 const currentStreams = new Set();
 const ASSET_PATH = path.join(app.getAppPath(), 'assets');
@@ -21,72 +19,88 @@ function changeMenubarState() {
   }
 }
 
+const configuration = {
+  host: '127.0.0.1',
+  port: 8000,
+  endpoint: '/app',
+  transcodingEnabled: false,
+  // ffmpeg: 'user/path/ffmpeg'
+  rtmp: {
+    port: 1935,
+    chunk_size: 60000,
+    gop_cache: true,
+    ping: 60,
+    ping_timeout: 30,
+  },
+};
+
 const menubar = Menubar({
   dir: ASSET_PATH,
   icon: path.resolve(ASSET_PATH, 'img/readyTemplate.png'),
-  height: 200,
+  height: 250,
   transparent: true,
   preloadWindow: true,
   browserWindow: {
-    height: 200,
+    height: 250,
     webPreferences: {
-      nodeIntegration: true
-    }
-  }
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  },
 });
-
 (async () => {
-  const port = await getPort();
-
-  const nms = new NodeMediaServer({
-    rtmp: {
-      port: 1935,
-      chunk_size: 60000,
-      gop_cache: true,
-      ping: 60,
-      ping_timeout: 30
-    },
+  const props = {
+    rtmp: configuration.rtmp,
     http: {
-      port,
+      port: configuration.port,
       mediaroot: './media',
-      allow_origin: '*'
+      allow_origin: '*',
     },
-    trans: {
-      ffmpeg: '/usr/local/bin/ffmpeg',
+  };
+
+  if (configuration.transcodingEnabled) {
+    props.trans = {
+      ffmpeg: configuration.ffmpeg || '/opt/homebrew/bin/ffmpeg',
       tasks: [
         {
           app: 'live',
           ac: 'aac',
           hls: true,
-          hlsFlags: '[hls_time=2:hls_list_size=3:hls_flags=delete_segments]'
-        }
-      ]
-    }
-  });
+          hlsFlags: '[hls_time=2:hls_list_size=3:hls_flags=delete_segments]',
+        },
+      ],
+    };
+  }
 
-  nms.on('prePublish', id => {
+  const nms = new NodeMediaServer(props);
+
+  nms.on('prePublish', (id) => {
     if (!currentStreams.has(id)) {
       currentStreams.add(id);
     }
     changeMenubarState();
   });
 
-  nms.on('donePublish', id => {
+  nms.on('donePublish', (id) => {
     currentStreams.delete(id);
     changeMenubarState();
   });
 
   nms.run();
 
-  menubar.on('ready', () => {
+  menubar.on('ready', (event) => {
+    const wc = menubar.window.webContents;
+    require('@electron/remote/main').enable(wc);
+    wc.send('initialize', configuration);
+
     changeMenubarState();
   });
 
-  ipcMain.on('app-ready', event => {
-    event.sender.send('port-ready', port);
+  ipcMain.on('app-ready', (event) => {
+    event.sender.send('port-ready');
   });
 
-  ipcMain.on('error', event => {
+  ipcMain.on('error', (event) => {
     console.error(event);
   });
 })();

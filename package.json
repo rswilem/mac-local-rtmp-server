@@ -11,17 +11,17 @@
     }
   },
   "dependencies": {
-    "electron-context-menu": "^0.9.1",
-    "filesize": "^3.6.1",
-    "get-port": "^4.0.0",
-    "lodash": "^4.17.13",
-    "menubar": "^6.0.6",
-    "node-media-server": "^1.2.7",
-    "shortid": "^2.2.8"
+    "@electron/remote": "^2.0.8",
+    "electron-context-menu": "^3.5.0",
+    "filesize": "^9.0.11",
+    "get-port": "^6.1.2",
+    "lodash": "^4.17.21",
+    "menubar": "^9.2.1",
+    "node-media-server": "^2.4.7"
   },
   "devDependencies": {
-    "electron": "^5.0.6",
-    "electron-builder": "^20.44.4"
+    "electron": "^19",
+    "electron-builder": "^23.3.3"
   },
   "scripts": {
     "start": "electron .",

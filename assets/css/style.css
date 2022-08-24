@@ -14,7 +14,7 @@ html {
   left: 0;
   bottom: 0;
   right: 0;
-  background: url(../img/frame.svg) center top no-repeat;
+  background: url(../img/frame.svg) center bottom no-repeat;
   background-size: 400px 200px;
   border-radius: 8px;
   display: flex;
@@ -58,6 +58,7 @@ html {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 0 20px;
 }
 
 .empty-state h2 {
@@ -72,7 +73,7 @@ html {
   top: 25px;
   right: 15px;
   cursor: pointer;
-  opacity: .7;
+  opacity: 0.7;
 }
 
 .copyable {
@@ -83,8 +84,9 @@ html {
   border: 1px dotted #dbdbdb;
   padding: 2px 5px;
   border-radius: 0 4px 4px 4px;
-  background-color: rgba(255, 255, 255, .8);
+  background-color: rgba(255, 255, 255, 0.8);
   position: relative;
+  margin-bottom: 20px;
 }
 
 .copyable:before {
@@ -92,7 +94,7 @@ html {
   position: absolute;
   bottom: 100%;
   left: -1px;
-  background-color: #A5A5A5;
+  background-color: #a5a5a5;
   color: #fff;
   font-size: 10px;
   line-height: 14px;
@@ -100,6 +102,10 @@ html {
   border-radius: 4px 4px 0 0;
   padding: 0 5px;
   text-transform: uppercase;
+}
+
+.copyable.no-title {
+  margin-bottom: 0;
 }
 
 .copyable.no-title:before {
@@ -111,7 +117,7 @@ html {
   margin-right: 5px;
   padding-right: 5px;
   border-right: 1px solid #ccc;
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
 .copyable a {
